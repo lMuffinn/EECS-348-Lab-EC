@@ -1,24 +1,59 @@
+/*
+Number Extractor
+Description: Takes in a string and outputs the double form of that string
+Inputs: A string
+Outputs: A double
+Author: Matthew Eagleman
+Date Created: 11/27/2024
+*/
+
+//Imports
 #include <iostream>
 #include <iomanip>
 #include <string>
 
+//NameSpaces
 using namespace std;
 
+//Functions
 double extractNumeric(const string& str);
+double power(int num, int power);
+bool isDigit(char chr);
+bool isValid(char chr);
 int getDecimalPlace(const string& str);
 int charToNum(char chr);
+int getSign(const string& str);
+int getPlace(int decimalPos, int index);
+
+//Main function
+int main(){
+    //Run the program
+    string input;
+    while (true) {
+        cout << "Enter a string (or 'END' to quit): ";
+        cin >> input;
+        if (input == "END") break;
+        double number = extractNumeric(input);
+        if (number != -999999.99) {
+            cout << "The input is: " << fixed << setprecision(4) << number << endl;
+        }
+        else {
+            cout << "The input is invalid." << endl;
+        }
+    }
+    return 0;
+}
 
 bool isDigit(char chr){
+    //Return whether or not the given character is a digit
     string digits = "0123456789";
     for (int i = 0; i < digits.length(); i++){
-        if (digits[i] == chr){
-            return true;
-        }
+        if (digits[i] == chr) return true;
     }
     return false;
 }
-
 int charToNum(char chr){
+    //Take a character and convert it to an integer
     switch (chr)
     {
         case '0':
@@ -45,41 +80,31 @@ int charToNum(char chr){
             throw runtime_error("Not a digit");
     }
 }
-
 double power(int num, int power){
-    double pow = num;
-    if (power > 0){
-        for (int i = 0; i< power - 1; i++){
-            pow *= pow;
-        }
-    }
-    else if (power == 0){
-        pow = 1;
-    }
-    else if (power < 0){
+    //Return a number taken to the given power
+    double truNum = num;
+    double result = num;
+    if (power == 0) return 1;
+    if (power < 0){
         power *= -1;
-        pow = 1/pow;
-        for (int i = 0; i< power - 1; i++){
-            pow *= 1/pow;
-        }
+        result = 1/result;
+        truNum = result;
     }
-    return pow;
+    for (int i = 0; i< power - 1; i++){
+        result *= truNum;
+    }
+    return result;
 }
-
 int getSign(const string& str){
+    //Return a integer representing whether the string is positive or negative
     for (int i = 1; i<str.length();i++){
-        if (str[i] == '+' || str[i] == '-'){
+        if (str[i] == '+' || str[i] == '-') {
             throw runtime_error("Sign must only be at the very front");
         }
     }
-    if (str[0] == '-'){
-        return -1;
-    }
-    else{
-        return 1;
-    }
+    if (str[0] == '-') return -1;
+    else return 1;
 }
-
 bool isValid(char chr){
     string valid = "0123456789+-.";
     for (int i = 0; i<valid.length(); i++){
@@ -89,7 +114,10 @@ bool isValid(char chr){
     }
     return false;
 }
-
+int getPlace(int decimalPos, int index){
+    if (index <=  decimalPos) return decimalPos - index - 1;
+    else if (index >= decimalPos) return decimalPos - index;
+}
 double extractNumeric(const string& str){
     double num = 0;
     int decimalPos;
@@ -98,25 +126,29 @@ double extractNumeric(const string& str){
         int sign = getSign(str);
         for (int i = 0; i < str.length(); i++){
             if (isValid(str[i])){
-                int place = decimalPos - i - 1;
                 if (isDigit(str[i])){
+                    int place = getPlace(decimalPos, i);
                     num += charToNum(str[i]) * power(10,place);
                 }
             }
+            else{
+                throw runtime_error("There is an invalid symbol in your input");
+            }
         }
-        return num;
+        return num * sign;
     }
     catch (const exception& e){
         return -999999.99;
     }
 }
-
 int getDecimalPlace(const string& str){
-    int place;
+    int place = str.length();
+    bool found = false;
     for (int i = 0; i < str.length(); i++){
         if (str[i] == '.'){
-            if (place == NULL){
+            if (!found){
                 place = i;
+                found = true;
             }
             else {
                 throw runtime_error("Can't have more than one decimal place");
@@ -124,27 +156,4 @@ int getDecimalPlace(const string& str){
         }
     }
     return place;
-}
-
-int main(){
-    string input;
-    
-    while (true) {
-        cout << "Enter a string (or 'END' to quit): ";
-        cin >> input;
-        if (input == "END") 
-        {
-            break;
-        }
-        double number = extractNumeric(input);
-        if (number != -999999.99)
-        {
-            cout << "The input is: " << fixed << setprecision(4) << number << endl;
-        } 
-        else 
-        {
-            cout << "The input is invalid." << endl;
-        }
-    }
-    return 0;
 }
