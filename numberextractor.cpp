@@ -15,7 +15,7 @@ Date Created: 11/27/2024
 //NameSpaces
 using namespace std;
 
-//Functions
+//Function Definitions
 double extractNumeric(const string& str);
 double power(int num, int power);
 bool isDigit(char chr);
@@ -25,7 +25,7 @@ int charToNum(char chr);
 int getSign(const string& str);
 int getPlace(int decimalPos, int index);
 
-//Main function
+//Main Function
 int main(){
     //Run the program
     string input;
@@ -44,6 +44,72 @@ int main(){
     return 0;
 }
 
+//Extract Numeric Function
+double extractNumeric(const string& str){
+    //Extract the numeric value from the given string
+    double num = 0;
+    int decimalPos;
+    try{
+        int decimalPos = getDecimalPlace(str); //Gets the location of the decimal place so that we know what the value of each digit is
+        int sign = getSign(str); //This gets whether or not the number is positive
+        for (int i = 0; i < str.length(); i++){
+            //This loops over each of the character values in the string
+            if (isValid(str[i])){ //checks whether the character can be turned into a numeric value
+                if (isDigit(str[i])){ //checks whether it is a digit, or some other symbol
+                    //If it is a digit it multiplies it by whatever place its supposed to be in and adds it to the number
+                    int place = getPlace(decimalPos, i);
+                    num += charToNum(str[i]) * power(10,place);
+                }
+            }
+            else{
+                throw runtime_error("There is an invalid symbol in your input");
+            }
+        }
+        return num * sign;
+    }
+    catch (const exception& e){
+        return -999999.99;
+    }
+}
+
+//Helper Functions
+int getDecimalPlace(const string& str){
+    //Return the location of the decimal place in the string
+    int place = str.length();
+    bool found = false;
+    for (int i = 0; i < str.length(); i++){
+        if (str[i] == '.'){
+            if (!found){
+                place = i;
+                found = true;
+            }
+            else {
+                throw runtime_error("Can't have more than one decimal place");
+            }
+        }
+    }
+    return place;
+}
+int getSign(const string& str){
+    //Return a integer representing whether the string is positive or negative
+    for (int i = 1; i<str.length();i++){
+        if (str[i] == '+' || str[i] == '-') {
+            throw runtime_error("Sign must only be at the very front");
+        }
+    }
+    if (str[0] == '-') return -1;
+    else return 1;
+}
+bool isValid(char chr){
+    //Return whether or not the given character is able to be turned into a double
+    string valid = "0123456789+-.";
+    for (int i = 0; i<valid.length(); i++){
+        if (chr == valid[i]){
+            return true;
+        }
+    }
+    return false;
+}
 bool isDigit(char chr){
     //Return whether or not the given character is a digit
     string digits = "0123456789";
@@ -51,6 +117,12 @@ bool isDigit(char chr){
         if (digits[i] == chr) return true;
     }
     return false;
+}
+int getPlace(int decimalPos, int index){
+    //Return the place of the given index with respect to the decimal
+    if (index <=  decimalPos) return decimalPos - index - 1;
+    else if (index >= decimalPos) return decimalPos - index;
+    else throw runtime_error("Decimal point does not have a place");
 }
 int charToNum(char chr){
     //Take a character and convert it to an integer
@@ -94,66 +166,4 @@ double power(int num, int power){
         result *= truNum;
     }
     return result;
-}
-int getSign(const string& str){
-    //Return a integer representing whether the string is positive or negative
-    for (int i = 1; i<str.length();i++){
-        if (str[i] == '+' || str[i] == '-') {
-            throw runtime_error("Sign must only be at the very front");
-        }
-    }
-    if (str[0] == '-') return -1;
-    else return 1;
-}
-bool isValid(char chr){
-    string valid = "0123456789+-.";
-    for (int i = 0; i<valid.length(); i++){
-        if (chr == valid[i]){
-            return true;
-        }
-    }
-    return false;
-}
-int getPlace(int decimalPos, int index){
-    if (index <=  decimalPos) return decimalPos - index - 1;
-    else if (index >= decimalPos) return decimalPos - index;
-}
-double extractNumeric(const string& str){
-    double num = 0;
-    int decimalPos;
-    try{
-        int decimalPos = getDecimalPlace(str);
-        int sign = getSign(str);
-        for (int i = 0; i < str.length(); i++){
-            if (isValid(str[i])){
-                if (isDigit(str[i])){
-                    int place = getPlace(decimalPos, i);
-                    num += charToNum(str[i]) * power(10,place);
-                }
-            }
-            else{
-                throw runtime_error("There is an invalid symbol in your input");
-            }
-        }
-        return num * sign;
-    }
-    catch (const exception& e){
-        return -999999.99;
-    }
-}
-int getDecimalPlace(const string& str){
-    int place = str.length();
-    bool found = false;
-    for (int i = 0; i < str.length(); i++){
-        if (str[i] == '.'){
-            if (!found){
-                place = i;
-                found = true;
-            }
-            else {
-                throw runtime_error("Can't have more than one decimal place");
-            }
-        }
-    }
-    return place;
 }
